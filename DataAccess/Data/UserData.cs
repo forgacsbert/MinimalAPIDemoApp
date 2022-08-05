@@ -41,5 +41,4 @@ public class UserData : IUserData
 
     public Task DeteleUser(int id) =>
         _db.SaveData("dbo.spUser_Delete", new { Id = id });
-
 }
