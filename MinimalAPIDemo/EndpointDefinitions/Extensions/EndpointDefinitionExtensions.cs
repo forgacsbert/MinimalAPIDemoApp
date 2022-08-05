@@ -23,9 +23,9 @@ public static class EndpointDefinitionExtensions
         services.AddSingleton(endpointDefinitions as IReadOnlyCollection<IEndpointDefinition>);
     }
 
-    public static void UseEndpointDefinition(this WebApplication app)
+    public static void UseEndpointDefinitions(this WebApplication app)
     {
-        var definitions = app.Services.GetRequiredService<IReadOnlyCollection<IEndpointDefinition>>();
+        var definitions = app.Services.GetRequiredService<IReadOnlyCollection<IEndpointDefinition>>().OrderBy(x => x.ShouldRunLast);
 
         foreach (var endpointDefinition in definitions)
         {

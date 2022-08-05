@@ -1,10 +1,15 @@
 ﻿using DataAccess.DbAccess;
+using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MinimalAPIDemo.EndpointDefinitions.Extensions;
 
 namespace MinimalAPIDemo.EndpointDefinitions;
 
 public class UserEndpointDefinition : IEndpointDefinition
 {
+    public bool ShouldRunLast => false;
+
     /// <summary>
     /// Method used to configure the application with the necessary endpoints.
     /// </summary>
@@ -15,7 +20,7 @@ public class UserEndpointDefinition : IEndpointDefinition
 
         app.MapGet("/Users", GetUsers);
         app.MapGet("/Users/{id}", GetUser);
-        app.MapPost("/Users", InsertUser);
+        app.MapPost("/Users", InsertUser).AllowAnonymous();
         app.MapPut("/Users", UpdateUser);
         app.MapDelete("/Users", DeleteUser);
     }
@@ -31,6 +36,7 @@ public class UserEndpointDefinition : IEndpointDefinition
     /// </summary>
     /// <param name="data">user data access</param>
     /// <returns>all users retrieved from the users data</returns>
+    [ProducesResponseType(200, Type = (typeof(UserModel)))]
     private async Task<IResult> GetUsers(IUserData data)
     {
         try
@@ -49,6 +55,7 @@ public class UserEndpointDefinition : IEndpointDefinition
     /// <param name="id">id of the user</param>
     /// <param name="data">user data access</param>
     /// <returns>found user</returns>
+    [ProducesResponseType(200, Type = (typeof(UserModel)))]
     private async Task<IResult> GetUser(int id, IUserData data)
     {
         try
@@ -69,10 +76,18 @@ public class UserEndpointDefinition : IEndpointDefinition
     /// <param name="user">user</param>
     /// <param name="data">data</param>
     /// <returns>result</returns>
-    private async Task<IResult> InsertUser(UserModel user, IUserData data)
+    private async Task<IResult> InsertUser(UserModel user, IValidator<UserModel> validator, IUserData data)
     {
         try
         {
+            var validationResult = validator.Validate(user);
+
+            if (!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors.Select(x => new { errors = x.ErrorMessage });
+                return Results.BadRequest(errors);
+            }
+
             await data.InsertUser(user);
             return Results.Ok();
         }
