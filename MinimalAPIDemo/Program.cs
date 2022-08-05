@@ -1,31 +1,13 @@
-using DataAccess.DbAccess;
-using MinimalAPIDemo;
+using MinimalAPIDemo.EndpointDefinitions.Extensions;
 
 // Program class used as a starting point of the application.
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// Add defined services from the Data Access layer.
-builder.Services.AddSingleton<ISQLDataAccess, SQLDataAccess>();
-builder.Services.AddSingleton<IUserData, UserData>();
+builder.Services.AddEndpointDefinitions(typeof(IEndpointDefinition));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+app.UseEndpointDefinition();
 app.UseHttpsRedirection();
-
-app.ConfigureApi();
-
 app.Run();
 

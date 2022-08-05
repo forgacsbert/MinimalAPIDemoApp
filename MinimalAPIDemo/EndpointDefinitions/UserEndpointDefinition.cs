@@ -1,14 +1,17 @@
-﻿namespace MinimalAPIDemo;
+﻿using DataAccess.DbAccess;
+using MinimalAPIDemo.EndpointDefinitions.Extensions;
 
-public static class Api
+namespace MinimalAPIDemo.EndpointDefinitions;
+
+public class UserEndpointDefinition : IEndpointDefinition
 {
     /// <summary>
     /// Method used to configure the application with the necessary endpoints.
     /// </summary>
     /// <param name="app">Represents the app that will be configured.</param>
-    public static void ConfigureApi(this WebApplication app)
+    public void DefineEndpoints(WebApplication app)
     {
-        // All of the endpoint mappings will be defined here.
+        // All of the user endpoint mappings will be defined here.
 
         app.MapGet("/Users", GetUsers);
         app.MapGet("/Users/{id}", GetUser);
@@ -17,12 +20,18 @@ public static class Api
         app.MapDelete("/Users", DeleteUser);
     }
 
+    public void DefineServices(IServiceCollection services)
+    {
+        services.AddSingleton<ISQLDataAccess, SQLDataAccess>();
+        services.AddSingleton<IUserData, UserData>();
+    }
+
     /// <summary>
     /// Gets all users
     /// </summary>
     /// <param name="data">user data access</param>
     /// <returns>all users retrieved from the users data</returns>
-    private static async Task<IResult> GetUsers(IUserData data)
+    private async Task<IResult> GetUsers(IUserData data)
     {
         try
         {
@@ -40,7 +49,7 @@ public static class Api
     /// <param name="id">id of the user</param>
     /// <param name="data">user data access</param>
     /// <returns>found user</returns>
-    private static async Task<IResult> GetUser(int id, IUserData data)
+    private async Task<IResult> GetUser(int id, IUserData data)
     {
         try
         {
@@ -60,7 +69,7 @@ public static class Api
     /// <param name="user">user</param>
     /// <param name="data">data</param>
     /// <returns>result</returns>
-    private static async Task<IResult> InsertUser(UserModel user, IUserData data)
+    private async Task<IResult> InsertUser(UserModel user, IUserData data)
     {
         try
         {
@@ -79,7 +88,7 @@ public static class Api
     /// <param name="user">user</param>
     /// <param name="data">data</param>
     /// <returns>Result</returns>
-    private static async Task<IResult> UpdateUser(UserModel user, IUserData data)
+    private async Task<IResult> UpdateUser(UserModel user, IUserData data)
     {
         try
         {
@@ -98,7 +107,7 @@ public static class Api
     /// <param name="id">id of user</param>
     /// <param name="data">data</param>
     /// <returns>result</returns>
-    private static async Task<IResult> DeleteUser(int id, IUserData data)
+    private async Task<IResult> DeleteUser(int id, IUserData data)
     {
         try
         {
